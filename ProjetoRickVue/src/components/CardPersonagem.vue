@@ -4,7 +4,6 @@ export default {
   props: {
     personagem: {
       type: Object,
-      required: true
     }
   }
 }
@@ -12,17 +11,13 @@ export default {
 
 <template>
   <div class="card h-100 text-center bg-dark text-white card-personagem mx-auto" style="width: 18rem;">
-    <img :src="personagem.image" class="card-img-top" :alt="personagem.name">
+    <img :src="personagem.image" class="card-img-top">
     <div class="card-body d-flex flex-column justify-content-between">
       <h5 class="card-title fw-bold">{{ personagem.name }}</h5>
       <p class="card-text text-secondary">{{ personagem.species }}</p>
-      
-      <router-link 
-        :to="'/detalhes/' + personagem.id" 
-        class="btn btn-new w-100 mt-2"
-      >
+      <a :href="'/detalhes/' + personagem.id" class="btn btn-new w-100 mt-2">
         Ver detalhes
-      </router-link>
+      </a>
     </div>
   </div>
 </template>
