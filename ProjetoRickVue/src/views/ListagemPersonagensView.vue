@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import CardPersonagem from '../components/CardPersonagem.vue'
 
 export default {
@@ -8,46 +8,59 @@ export default {
     CardPersonagem
   },
   setup() {
-    //essa é a nossa lista que o vue fvai usar para mostrar os cards na tela
     const personagens = ref([])
+    const textoBusca = ref('') 
+    const paginaAtual = ref(1) 
 
+    // puxa os dados da api filtrando por página e por nome ao mesmo tempo
     const listarPersonagens = () => {
+      let url = `https://rickandmortyapi.com/api/character?page=${paginaAtual.value}`
+      
+      if (textoBusca.value.trim() !== '') {
+        url += `&name=${textoBusca.value}`
+      }
 
-      fetch('https://rickandmortyapi.com/api/character', {
-        method: 'GET'
-      })
+      fetch(url, { method: 'GET' })
         .then(response => response.json())
-        .then(function(json){
-          //em vez de dar innerHTML no container, a gente joga os resultados na lista
-          json.results.map(function(results) {
-            personagens.value.push(results)
-          })
+        .then(function(json) {
+          personagens.value = json.results || []
         })
         .catch(error => {
-          console.log('Ocorreu um erro para obter os personagens: ', error)
+          console.log('Nenhum personagem encontrado ou deu erro: ', error)
+          personagens.value = [] 
         })
-
-      fetch('https://rickandmortyapi.com/api/character?page=2', {
-        method: 'GET'
-      })
-        .then(response => response.json())
-        .then(function(json){
-          json.results.map(function(results) {
-            personagens.value.push(results)
-          })
-        })
-        .catch(error => {
-          console.log('Ocorreu um erro para obter os personagens: ', error)
-        })
-
     }
 
-    //rodando a nossa função de listar os personagens assim que a pagina carrega
+    // monitora o input de busca pra resetar pra página 1 e caçar na api toda
+    watch(textoBusca, () => {
+      paginaAtual.value = 1
+      listarPersonagens()
+    })
+
+    const proximaPagina = () => {
+      if (personagens.length != 0) {
+        paginaAtual.value++
+        listarPersonagens()
+      }
+    }
+
+    const paginaAnterior = () => {
+      if (paginaAtual.value > 1) {
+        paginaAtual.value--
+        listarPersonagens()
+      }
+    }
+
     onMounted(() => {
       listarPersonagens()
     })
+
     return {
-      personagens
+      personagens,
+      textoBusca,
+      paginaAtual,
+      proximaPagina,
+      paginaAnterior
     }
   }
 }
@@ -72,12 +85,45 @@ export default {
 
     <div class="container-fluid py-5 p-0">
       <h2 class="mb-5 text-center text-white fw-bold target-titulo">Personagens</h2>
+
+      <div class="input-group mb-5 mx-auto" style="max-width: 600px; padding: 0 15px;">
+        <input 
+          v-model="textoBusca" 
+          type="text" 
+          class="form-control bg-dark text-white border-secondary" 
+          placeholder="Pesquisar por nome..." 
+          aria-label="Pesquisa"
+        >
+      </div>
       
       <div class="d-flex flex-wrap gap-5 justify-content-center px-4">
         <div v-for="personagem in personagens" :key="personagem.id">
           <CardPersonagem :personagem="personagem" />
         </div>
+
+        <div v-if="personagens.length === 0" class="text-center text-white w-100 fs-5 mt-4">
+          Nenhum personagem encontrado com o nome "{{ textoBusca }}".
+        </div>
       </div>
+
+      <div class="d-flex justify-content-center align-items-center gap-3 mt-5 pb-5">
+        <button 
+          @click="paginaAnterior" 
+          :disabled="paginaAtual === 1" 
+          class="btn btn-outline-light px-4"
+        >
+          Anterior
+        </button>
+        <span class="text-white fw-bold fs-5">Página {{ paginaAtual }}</span>
+        <button 
+          @click="proximaPagina" 
+          :disabled="personagens.length === 0"
+          class="btn btn-outline-light px-4"
+        >
+          Próxima
+        </button>
+      </div>
+
     </div>
   </div>
 </template>
@@ -95,6 +141,16 @@ export default {
 .target-titulo {
   font-size: 2rem;
   font-family: sans-serif;
+}
+
+.form-control::placeholder {
+  color: #6c757d;
+}
+.form-control:focus {
+  background-color: #1a1a1a;
+  color: white;
+  border-color: #00AEEF;
+  box-shadow: 0 0 0 0.25rem rgba(0, 174, 239, 0.25);
 }
 
 @media (max-width: 900px) {
