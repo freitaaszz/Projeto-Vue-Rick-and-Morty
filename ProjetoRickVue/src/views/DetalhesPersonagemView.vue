@@ -55,7 +55,7 @@ export default {
           <p class="fs-5"><strong>Localização:</strong> {{ personagem.location?.name }}</p>
         </div>
       </div>
-
+      <!-- caso demore para achar o personagem vai ficar com esse texto na tela -->
       <div v-else class="text-center mt-5 fs-4 text-muted">
         Carregando detalhes do personagem...
       </div>

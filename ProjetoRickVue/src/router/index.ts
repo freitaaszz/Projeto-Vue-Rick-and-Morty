@@ -11,10 +11,10 @@ const router = createRouter({
       component: ListagemPersonagensView,
     },
     {
-    path: '/detalhes/:id', // O :id diz que esse pedaço da URL muda para cada personagem
+    path: '/detalhes/:id', // o :id diz que esse pedaço da URL muda para cada personagem então cada personagem tem o seu proprio id na API e na URL vai mostrar esse id
     name: 'detalhes',
     component: DetalhesPersonagemView,
-    props: true // Faz o ID virar uma prop direto na tela de detalhes
+    props: true // faz o id virar uma prop direto na tela de detalhes
     }
   ],
 })
